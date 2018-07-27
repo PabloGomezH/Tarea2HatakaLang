@@ -1,0 +1,34 @@
+home
+	engari taurangi1 = pono
+	tau taurangi2 = 0
+	tau taurangi3
+	tau taurangi4
+	katoa  i
+	
+	tauira "taurangi2"
+	
+	ae(taurangi2==0){
+		taurangi2=2000
+	}
+	
+	taurangi4=panui
+	mo taurangi3=1| taurangi3<100{
+		taurangi2 = taurangi2-1
+		tauira "taurangi2"
+	}
+	
+	taurangi3=0
+	ahakoa (taurangi1){
+		taurangi3 = taurangi3+1
+		ae(taurangi3>50){
+			taurangi1=suamor
+		}
+	}
+	i=panui
+	
+	huringa (i){
+		tuhinga 1: tauri "taurangi1"
+	    mate: tauri "i"
+	}
+		
+mutunga
