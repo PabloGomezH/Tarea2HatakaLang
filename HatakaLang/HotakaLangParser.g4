@@ -25,8 +25,8 @@ sentencia	:    declaracionvar
             ;
 
 
-declaracionvar	:	variable ID SALTO
-				|	variable asignvar SALTO
+declaracionvar	:	variable ID
+				|	variable asignvar
 				;
 
 
@@ -37,10 +37,15 @@ variable	:	REAL
 			;
 
 
-asignvar	:	ID ASIGN NUM
-			|	ID ASIGN SINO
-			|	ID ASIGN STR
-			|	ID ASIGN FLOAT
+asignvar	:	ID ASIGN tipos
+			|   ID ASIGN operaciones
+			;
+
+
+tipos       :	NUM
+			|	SINO
+			|	STR
+			|	FLOAT
 			;
 
 
@@ -81,10 +86,10 @@ sumas	:	ID SUMA ID
 		|	NUM SUMA NUM
 		;
 		
-muestra	:	MUESTRA COM ID COM SALTO
+muestra	:	MUESTRA (STR | ID)+
 		;
 		
-leer	: ID ASIGN LEE SALTO
+leer	: ID ASIGN LEE
 		;
 
 fors	:	FOR asignvar PIP operaciones LLI bloque LLD
