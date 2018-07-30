@@ -139,7 +139,35 @@ class HotakaLangParserSemantic extends HotakaLangParserBaseVisitor<Object>
 		return null;
 	}
 	
-	//seguir aqui
+	@Override
+	public Object visitLeer(HotakaLangParserParser.LeerContext input)
+	{
+		try
+		{
+			if(todas_variables.containsKey(input.ID().getText()))
+			{
+				if(input.ASIGN().getText().equals("="))
+				{
+					if(input.LEE().getText().equals("panui"))
+					{
+						String tipo = todas_variables.get(input.ID().getText());
+						if(tipo.equals("int"))
+							System.out.println("\tscanf(\"%d\",&" + input.ID().getText() + ");");
+						else if(tipo.equals("char"))
+							System.out.println("\tscanf(\"%s\",&" + input.ID().getText() + ");");
+						else if(tipo.equals("float"))
+							System.out.println("\tscanf(\"%f\",&" + input.ID().getText() + ");");
+					} else
+						throw new IllegalArgumentException("Se espera 'panui' y se recibió '" + input.LEE().getText() + "'.");
+				} else
+					throw new IllegalArgumentException("El simbolo de igualacion es incorrecto.");
+			}
+		} catch(Exception noSeUsa)
+		{
+			throw new IllegalArgumentException("La variable '" + input.ID().getText() + "' no existe");
+		}
+		return null;
+	}
 	
 	private String obtenerTipoVar(String var)
 	{
