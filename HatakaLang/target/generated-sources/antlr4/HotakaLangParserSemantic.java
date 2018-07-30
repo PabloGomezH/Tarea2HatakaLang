@@ -8,7 +8,6 @@ import java.util.Map;
 class HotakaLangParserSemantic extends HotakaLangParserBaseVisitor<Object>
 {
 	protected Map<String, String> todas_variables = new HashMap<String, String>();
-	protected Map<String, String> todos_valores_variables = new HashMap<String, String>();
 	
 	public HotakaLangParserSemantic( ) {}
 	
