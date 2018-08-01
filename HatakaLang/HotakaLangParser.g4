@@ -97,12 +97,16 @@ fors	:	FOR asignvar PIP operaciones LLI bloque LLD
 
 
 condicional	 :	IF bloque_condicional
-				(ELSE bloque_condicional)?
+				(ELSE bloque_condicional_else)?
 				;	
 
 bloque_condicional 	: 	PI operaciones PD LLI bloque LLD
-					| PI operaciones PD sentencia
-					;	
+					| 	PI operaciones PD sentencia
+					;
+					
+bloque_condicional_else	:	LLI bloque LLD
+						|	sentencia
+						;	
 					
 switchz	:	SWITCH PI ID PD LLI casos_switch+  LLD
 		;

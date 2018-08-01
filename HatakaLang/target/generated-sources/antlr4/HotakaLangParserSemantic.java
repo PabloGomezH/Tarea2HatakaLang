@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 class HotakaLangParserSemantic extends HotakaLangParserBaseVisitor<Object>
 {
 	protected Map<String, String> todas_variables = new HashMap<String, String>();
@@ -155,6 +157,139 @@ class HotakaLangParserSemantic extends HotakaLangParserBaseVisitor<Object>
 		return null;
 	}
 	
+	@Override
+	public Object visitMuestra(HotakaLangParserParser.MuestraContext ctx) 
+	{
+		if(ctx.ID().size() > 0) {
+			String id, format="", args="";
+			for (int i=0; i<ctx.ID().size(); i++) {
+				id = ctx.ID(i).getText();
+				if(todas_variables.containsKey(id)) {
+					format += getTipoVarModo(todas_variables.get(id)) + " ";
+					args += id + ", ";	
+				}else {
+					throw new IllegalArgumentException("Variable '" + id + "' no definida");
+				}
+			}
+			System.out.println(String.format("\tprintf(\"%s\", %s);", format.substring(0, format.length() - 1), args.substring(0, args.length() - 2)));
+		}else {
+			String text = ctx.STR().getText();
+			if(text!=null) {
+				System.out.println(String.format("\tprintf(%s);", text));
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public Object visitCondicional(HotakaLangParserParser.CondicionalContext ctx) {
+		String begin_if		=	"";
+		String begin__else	=	"";
+		
+		if(ctx.IF().getText().equals("ae")) {
+			begin_if		=	"\n\tif(";
+		}
+		
+		if(ctx.bloque_condicional()!=null) {
+			if(ctx.bloque_condicional().operaciones()!=null) {
+				String condicion = visitOperaciones(ctx.bloque_condicional().operaciones());
+				System.out.println(begin_if+""+condicion+"){");
+			}	
+		}
+		
+		for(int i=0; i<ctx.bloque_condicional().bloque().sentencia().size(); i++) {
+
+            if(ctx.bloque_condicional().bloque().sentencia(i).asignvar() != null) {           	
+            	visitAsignvar(ctx.bloque_condicional().bloque().sentencia(i).asignvar());
+            	
+            }else if(ctx.bloque_condicional().bloque().sentencia(i).declaracionvar() != null) {
+                visitDeclaracionvar(ctx.bloque_condicional().bloque().sentencia(i).declaracionvar());
+                
+            }else if(ctx.bloque_condicional().bloque().sentencia(i).condicional() != null) {
+            	visitCondicional(ctx.bloque_condicional().bloque().sentencia(i).condicional());
+            
+            }else if(ctx.bloque_condicional().bloque().sentencia(i).leer() != null) {
+                visitLeer(ctx.bloque_condicional().bloque().sentencia(i).leer());
+
+            }else if(ctx.bloque_condicional().bloque().sentencia(i).muestra() != null) {
+            	visitMuestra(ctx.bloque_condicional().bloque().sentencia(i).muestra());
+
+            }
+        }
+		System.out.println("\t}");
+
+       if(ctx.ELSE() != null) {
+             if(ctx.ELSE().getText().equals("aee")) {
+
+                String inicio_else = "\telse {";
+                System.out.println(inicio_else);
+                
+                if(ctx.bloque_condicional_else()!=null) {
+                	visitBloque_condicional_else(ctx.bloque_condicional_else());
+                }
+            }
+        }
+		return null; 
+	}
+	
+	@Override
+	public Object visitBloque_condicional_else(HotakaLangParserParser.Bloque_condicional_elseContext ctx) { 
+		for(int i=0; i<ctx.bloque().sentencia().size(); i++) {
+
+            if(ctx.bloque().sentencia(i).asignvar() != null) {           	
+            	visitAsignvar(ctx.bloque().sentencia(i).asignvar());
+            	
+            }else if(ctx.bloque().sentencia(i).declaracionvar() != null) {
+                visitDeclaracionvar(ctx.bloque().sentencia(i).declaracionvar());
+                
+            }else if(ctx.bloque().sentencia(i).condicional() != null) {
+            	visitCondicional(ctx.bloque().sentencia(i).condicional());
+            
+            }else if(ctx.bloque().sentencia(i).leer() != null) {
+                visitLeer(ctx.bloque().sentencia(i).leer());
+
+            }else if(ctx.bloque().sentencia(i).muestra() != null) {
+            	visitMuestra(ctx.bloque().sentencia(i).muestra());
+            }
+        }
+		
+		System.out.println("\t}");
+		return null;
+	}
+	
+	@Override 
+	public String visitOperaciones(HotakaLangParserParser.OperacionesContext ctx) { 
+		String[] condicion = new String[3];
+		for(int i=0; i<ctx.operaciones().size();i++) {
+			String var	=	ctx.operaciones().get(i).getText();
+			if(todas_variables.containsKey(var)) {
+				if(todas_variables.get(var).equals("int")||todas_variables.get(var).equals("float")) {
+					condicion[i]=var;
+				}
+			}else if(esNumero(var)) {
+					condicion[i]=var;
+			}else {
+				if(!todas_variables.containsKey(var)) {
+					throw new IllegalArgumentException("Variable '"+var+"'no definida");
+				}
+				else {
+					throw new IllegalArgumentException("Variable '"+var+"'no es numerica");
+				}
+			}
+		}
+		condicion[2] = obtenerOperadorL(ctx.operador().getText());
+		
+		return String.format("%s %s %s", condicion[0],condicion[2],condicion[1]); 
+	}
+	
+	private String obtenerOperadorL(String var) {
+		if(var.equals("a")) return "&&";
+		if(var.equals("ranei")) return "||";
+		if(var.equals("kore"))return "!";
+		else return var;
+		
+	}
+	
 	private String obtenerTipoVar(String var)
 	{
 		if(var.equals("tau"))
@@ -165,6 +300,14 @@ class HotakaLangParserSemantic extends HotakaLangParserBaseVisitor<Object>
 			return "int";
 		else
 			return "char";
+	}
+	
+	private String getTipoVarModo(String var)
+	{
+		if(var.equals("tau")) return "%f";
+		if(var.equals("katoa")) return "%d";
+		if(var.equals("engari")) return "%d";
+		else return "%s";
 	}
 	
 	private String tipoVar(String var)

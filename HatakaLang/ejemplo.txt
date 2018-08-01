@@ -9,6 +9,8 @@ home
 	
 	ae(taurangi2==0){
 		taurangi2=2000
+		taurangi2 = taurangi2-1
+		tauira "taurangi2"
 	}
 	
 	taurangi4=panui
@@ -27,8 +29,8 @@ home
 	i=panui
 	
 	huringa (i){
-		tuhinga 1: tauri "taurangi1"
-	    mate: tauri "i"
+		tuhinga 1: tauira taurangi1
+	    mate: tauira i
 	}
 		
 mutunga
